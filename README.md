@@ -29,6 +29,18 @@ This viewer makes it easy to view any Playwright report without setting up a loc
 2. Enter the URL in the input field, or
 3. Use the URL parameter: `https://dsmmcken.github.io/playwright-zip-viewer/?url=YOUR_ZIP_URL`
 
+## Architecture
+
+The viewer works entirely in the browser with no server-side processing:
+
+1. **ZIP Extraction** - Uses [zip.js](https://gildas-lormeau.github.io/zip.js/) to extract the report files in-memory
+2. **Blob URLs** - Each extracted file is converted to a blob URL, creating a virtual file system
+3. **URL Interception** - JavaScript patches `URL`, `fetch`, and `XMLHttpRequest` to intercept relative path requests and map them to the correct blob URLs
+4. **Dynamic Resource Handling** - A `MutationObserver` and property setters on `HTMLImageElement`, `HTMLVideoElement`, etc. ensure dynamically added elements also resolve correctly
+5. **Iframe Isolation** - The report runs in an iframe with all patches injected, keeping the viewer and report environments separate
+
+This approach allows Playwright reports (including traces) to function as if served from a real web server.
+
 ## Self-Hosting
 
 The viewer is a simple static site with no build step:
