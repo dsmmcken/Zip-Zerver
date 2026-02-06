@@ -39,13 +39,9 @@ const loadingText = document.getElementById('loading-text');
 const errorDiv = document.getElementById('error');
 const errorMessage = document.getElementById('error-message');
 const reportFrame = document.getElementById('report-frame');
-const backButton = document.getElementById('back-button');
 const mainContainer = document.getElementById('main-container');
 const fileInput = document.getElementById('file-input');
-const urlInput = document.getElementById('url-input');
-const urlLoadBtn = document.getElementById('url-load-btn');
 const inputWrapper = document.getElementById('input-wrapper');
-const urlSection = document.getElementById('url-section');
 const uploadBtn = document.getElementById('upload-btn');
 
 // Upload button handler
@@ -80,59 +76,39 @@ dropZone.addEventListener('drop', (e) => {
 window.addEventListener('dragover', (e) => e.preventDefault());
 window.addEventListener('drop', (e) => e.preventDefault());
 
-// URL load handlers
-urlLoadBtn.addEventListener('click', (e) => { loadFromUrl(); e.stopPropagation(); });
-urlInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') loadFromUrl();
-});
-urlInput.addEventListener('click', (e) => {
-  e.stopPropagation(); // Prevent triggering file select
-});
+// Track if we have a report loaded (for forward navigation)
+let hasReportLoaded = false;
 
-async function loadFromUrl() {
-  let url = urlInput.value.trim();
-  if (!url) {
-    showError('Please enter a URL');
-    return;
-  }
-
-  try {
-    showLoading('Fetching ZIP from URL...');
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const blob = await response.blob();
-    const file = new File([blob], 'report.zip', { type: 'application/zip' });
-    await handleFile(file);
-
-  } catch (err) {
-    console.error('Error loading from URL:', err);
-    let errorMsg = `Failed to load ZIP from URL: ${err.message}`;
-
-    // Add helpful hint for CORS errors
-    if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-      errorMsg += '<br><br><small>This may be a CORS error. The server hosting the ZIP file must allow cross-origin requests, or you can download the file and drop it here instead.</small>';
-    }
-
-    showError(errorMsg);
-  }
-}
-
-// Back button - cleanup blob URLs
-backButton.addEventListener('click', () => {
-  // Revoke all blob URLs to free memory
-  createdBlobUrls.forEach(url => URL.revokeObjectURL(url));
-  createdBlobUrls = [];
-
-  reportFrame.src = 'about:blank';
+// Return to home view (hide report, show main)
+function returnToViewer() {
   reportFrame.classList.remove('active');
-  backButton.classList.remove('active');
   mainContainer.style.display = '';
   hideLoading();
   hideError();
+}
+
+// Show report view (hide main, show report)
+function showReportView() {
+  mainContainer.style.display = 'none';
+  reportFrame.classList.add('active');
+}
+
+// Load report into iframe
+function loadReport(url) {
+  reportFrame.src = url;
+  hasReportLoaded = true;
+  showReportView();
+}
+
+// Handle browser back/forward with popstate
+window.addEventListener('popstate', (event) => {
+  if (event.state?.page === 'report' && hasReportLoaded) {
+    // Forward navigation - just show the iframe (content still there)
+    showReportView();
+  } else {
+    // Back navigation - show home
+    returnToViewer();
+  }
 });
 
 function showError(message) {
@@ -559,10 +535,10 @@ async function handleFile(file) {
 
     // Show the report
     hideLoading();
-    mainContainer.style.display = 'none';
-    reportFrame.src = htmlUrl;
-    reportFrame.classList.add('active');
-    backButton.classList.add('active');
+    loadReport(htmlUrl);
+
+    // Push history state for back/forward navigation
+    history.pushState({ page: 'report' }, '');
 
   } catch (err) {
     console.error('Error:', err);
@@ -570,10 +546,3 @@ async function handleFile(file) {
   }
 }
 
-// Check for URL parameter on page load
-const urlParams = new URLSearchParams(window.location.search);
-const urlParam = urlParams.get('url');
-if (urlParam) {
-  urlInput.value = urlParam;
-  loadFromUrl();
-}

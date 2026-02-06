@@ -1,64 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Playwright Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:wght@400;500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="top-buttons">
+      <button class="upload-btn" id="upload-btn">Select ZIP...</button>
+      <button class="why-button" popovertarget="why-popover">why?</button>
+    </div>
+    <div id="why-popover" popover>
+      <p><strong>Playwright Report Viewer</strong></p>
+      <p class="popover-options">
+        Extract and view Playwright reports in the browser. Serves traces locally.
+      </p>
+      <p class="popover-features">
+        Drag & drop ZIP · Upload · Load from URL · <code>?url=</code> parameter
+      </p>
+      <p class="popover-privacy">All processing happens locally. No data is uploaded.</p>
+      <p class="popover-link">
+        <a href="https://github.com/dsmmcken/playwright-zip-viewer" target="_blank">GitHub</a>
+      </p>
+    </div>
+
     <div class="container" id="main-container">
       <div class="input-wrapper" id="input-wrapper">
         <div class="drop-zone" id="drop-zone">
           <div class="drop-zone-content">
-            <div class="drop-zone-icon">📦</div>
-            <div class="drop-zone-text">Drop a Playwright report ZIP file here</div>
+            <svg class="main-title" viewBox="0 0 420 105" preserveAspectRatio="xMidYMid meet">
+              <text class="title-text" x="210" y="58" text-anchor="middle">Zip Zerver</text>
+              <text class="subtitle-text" x="210" y="95" text-anchor="middle">
+                A client-side service worker for viewing zipped website archives.
+              </text>
+            </svg>
 
-            <div class="button-wrapper">
-              <button class="upload-btn" id="upload-btn">Select ZIP...</button> or
-              <div class="url-section" id="url-section">
-                <div class="url-input-group">
-                  <input
-                    type="text"
-                    class="url-input"
-                    id="url-input"
-                    placeholder="Enter ZIP file URL..."
-                  />
-                  <button class="url-load-btn" id="url-load-btn">Load</button>
-                </div>
-              </div>
-            </div>
             <div class="error" id="error">
               <p id="error-message"></p>
             </div>
           </div>
 
+          <footer class="footer">Drag & drop ZIP. No data leaves your browser.</footer>
+
           <div class="loading" id="loading">
             <div class="spinner"></div>
             <div id="loading-text">Extracting report...</div>
           </div>
-
-          <footer class="footer">
-            <p><strong>Playwright Report Viewer</strong></p>
-            <p class="footer-options">
-              Exract and view Playwright reports in the browser. Serves traces locally. <br />
-              Drag & drop ZIP · Upload · Load from URL · <code>?url=</code> parameter
-            </p>
-            <p class="privacy">All processing happens locally. No data is uploaded.</p>
-            <p class="repo-link">
-              <a href="https://github.com/dsmmcken/playwright-zip-viewer" target="_blank"
-                >GitHub</a
-              >
-            </p>
-          </footer>
         </div>
       </div>
     </div>
 
-    <button class="back-button" id="back-button">← Back to Viewer</button>
     <iframe class="report-frame" id="report-frame"></iframe>
     <input type="file" id="file-input" accept=".zip" />
 
+    <script src="border.js"></script>
+    <script src="drag-over.js"></script>
     <script type="module" src="script.js"></script>
   </body>
 </html>
